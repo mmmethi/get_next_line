@@ -6,60 +6,57 @@
 /*   By: mmmethi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/03 10:56:05 by mmmethi           #+#    #+#             */
-/*   Updated: 2019/07/05 14:50:13 by mmmethi          ###   ########.fr       */
+/*   Updated: 2019/07/08 11:36:40 by mmmethi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int		ft_newline(char **str, char **line, int fd)
+static int		ft_readl(int fd, char **str)
 {
-	char	*s;
-	int		i;
+	char	*buf;
+	char	*store;
+	int	ret;
 
-	i = 0;
-	while (str[fd][i] != '\n' && str[fd][i] != '\0')
-		i++;
-	if (str[fd][i] == '\n')
+	if (!(buf = (char *)malloc(sizeof(*buf) * (BUFF_SIZE + 1))))
+		return (-1);
+	ret = read(fd, buf, BUFF_SIZE);
+	if (ret > 0)
 	{
-		*line = ft_strsub(str[fd], 0, i);
-		s = ft_strdup(str[fd] + i + 1);
-		free(str[fd]);
-		str[fd] = s;
-		if (str[fd][0] == '\0')
-			ft_strdel(&str[fd]);
+		buf[ret] = '\0';
+		store = ft_strjoin(*str, buf);
+		free(*str);
+		*str = store;
 	}
-	else if (str[fd][i] == '\0')
-	{
-		*line = ft_strdup(str[fd]);
-		ft_strdel(&str[fd]);
-	}
-	return (1);
+	free(buf);
+	return (ret);
 }
 
-int		get_next_line(const int fd, char **line)
+int			get_next_line(const int fd, char **line)
 {
-	static char *str[255];
-	char		buff[BUFF_SIZE + 1];
+	static char *mem;
 	char		*s;
-	int			ret;
+	int			val;
 
-	if (fd < 0 || line == NULL)
+	if ((!mem && (mem = (char *)malloc(sizeof(*mem))) == NULL)
+		       	|| fd < 0 || line == NULL || BUFF_SIZE < 0)
 		return (-1);
-	while ((ret = read(fd, buff, BUFF_SIZE)) > 0)
+	s = ft_strchr(mem, '\n');
+	while (s == NULL)
 	{
-		buff[ret] = '\0';
-		if (!str[fd])
-			str[fd] = ft_strnew(1);
-		s = ft_strjoin(str[fd], buff);
-		free(str[fd]);
-		str[fd] = s;
-		if (ft_strchr(buff, '\n'))
-			break ;
+		val = ft_readl(fd, &mem);
+		if (val == 0)
+		{
+			if (ft_strlen(mem) == 0)
+				return (0);
+			mem = ft_strjoin(mem, "\n");
+		}
+		if (val < 0)
+			return (-1);
+		else
+			s = ft_strchr(mem, '\n');
 	}
-	if (ret < 0)
-		return (-1);
-	else if (ret == 0 && (str[fd] == NULL || str[fd][0] == '\0'))
-		return (0);
-	return (ft_newline(str, line, fd));
+	*line = ft_strsub(mem, 0, ft_strlen(mem) - ft_strlen(s));
+	mem = ft_strdup(s + 1);
+	return (1);
 }
