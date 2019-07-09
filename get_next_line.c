@@ -6,7 +6,7 @@
 /*   By: mmmethi <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/03 10:56:05 by mmmethi           #+#    #+#             */
-/*   Updated: 2019/07/08 11:36:40 by mmmethi          ###   ########.fr       */
+/*   Updated: 2019/07/09 12:41:47 by mmmethi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ static int		ft_readl(int fd, char **str)
 {
 	char	*buf;
 	char	*store;
-	int	ret;
+	int		ret;
 
 	if (!(buf = (char *)malloc(sizeof(*buf) * (BUFF_SIZE + 1))))
 		return (-1);
@@ -32,14 +32,14 @@ static int		ft_readl(int fd, char **str)
 	return (ret);
 }
 
-int			get_next_line(const int fd, char **line)
+int				get_next_line(const int fd, char **line)
 {
 	static char *mem;
 	char		*s;
 	int			val;
 
 	if ((!mem && (mem = (char *)malloc(sizeof(*mem))) == NULL)
-		       	|| fd < 0 || line == NULL || BUFF_SIZE < 0)
+			|| fd < 0 || line == NULL || BUFF_SIZE < 0)
 		return (-1);
 	s = ft_strchr(mem, '\n');
 	while (s == NULL)
